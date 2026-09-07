@@ -2,18 +2,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>クハ 9001 - Tokyu 9000 GTO Web Sampler</title>
+    <title>クハ 9001 - Tokyu 9000 Realistic Master Controller</title>
     <style>
         :root {
             --bg: #0b0c10;
-            --panel: #1f2833;
-            --accent: #66fcf1;
-            --accent-dim: #45a29e;
-            --text: #c5c6c7;
-            --danger: #ff5555;
-            --success: #55ff55;
+            --panel: #161b22;
+            --accent: #58a6ff;
+            --accent-dim: #30363d;
+            --text: #c9d1d9;
+            --danger: #f85149;
+            --success: #3fb950;
+            --master-bg: #21262d;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Consolas', monospace; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Consolas', monospace; user-select: none; }
         body {
             background-color: var(--bg);
             color: var(--text);
@@ -24,12 +25,12 @@
             min-height: 100vh;
             padding: 15px;
         }
-        h1 { color: var(--accent); font-size: 18px; margin-bottom: 3px; text-transform: uppercase; }
-        .sub { font-size: 10px; color: var(--accent-dim); margin-bottom: 12px; }
+        h1 { color: var(--accent); font-size: 16px; margin-bottom: 3px; text-transform: uppercase; }
+        .sub { font-size: 10px; color: #8b949e; margin-bottom: 12px; }
 
         .workspace {
             display: grid;
-            grid-template-columns: 320px 480px;
+            grid-template-columns: 340px 460px;
             gap: 12px;
             width: 812px;
         }
@@ -54,89 +55,113 @@
         .dash { display: flex; flex-direction: column; gap: 8px; align-items: center; }
         
         .pwr-btn {
-            background: #2c0b0e;
+            background: #1f1113;
             color: var(--danger);
             border: 1px solid var(--danger);
             width: 100%;
-            padding: 9px;
+            padding: 8px;
             font-weight: bold;
             cursor: pointer;
             border-radius: 4px;
             font-size: 11px;
+            transition: 0.1s;
         }
         .pwr-btn.active {
-            background: #0b2c12;
+            background: #0d2012;
             color: var(--success);
             border-color: var(--success);
         }
 
         .screen {
             background: #000;
-            border: 2px inset var(--accent-dim);
+            border: 2px inset #333;
             width: 100%;
             padding: 8px;
             text-align: center;
             border-radius: 4px;
         }
-        .speed-num { font-size: 38px; color: var(--success); font-weight: bold; }
-        .speed-lbl { font-size: 9px; color: #707070; margin-top: 2px; }
+        .speed-num { font-size: 36px; color: var(--success); font-weight: bold; letter-spacing: 2px; }
+        .speed-lbl { font-size: 9px; color: #6e7681; margin-top: 2px; }
 
         .status {
-            background: #111;
-            border: 1px solid #333;
+            background: #0d1117;
+            border: 1px solid var(--accent-dim);
             width: 100%;
             padding: 6px;
             font-size: 10px;
             color: var(--accent);
             text-align: center;
             border-radius: 4px;
-            min-height: 28px;
+            min-height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .pad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
+        /* Реалистичный блок маскона (контроллера) */
+        .master-controller {
+            background: var(--master-bg);
+            border: 2px solid #30363d;
+            border-radius: 6px;
             width: 100%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        button.nt {
-            background: #0b0c10;
+
+        .mc-row {
+            display: flex;
+            gap: 4px;
+            justify-content: space-between;
+        }
+
+        button.notch-btn {
+            flex: 1;
+            background: #161b22;
             color: var(--text);
-            border: 1px solid #45a29e;
-            padding: 9px;
+            border: 1px solid #30363d;
+            padding: 10px 0;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 3px;
+            transition: background 0.05s, transform 0.05s;
         }
-        button.nt:hover { background: #1f2833; border-color: var(--accent); }
-        button.nt.active { background: var(--accent); color: #0b0c10; border-color: #fff; }
-        .brk { border-color: #ff5555 !important; color: #ff5555 !important; }
-        .brk.active { background: #ff5555 !important; color: #000 !important; }
+        button.notch-btn:hover { background: #30363d; }
+        button.notch-btn:active { transform: scale(0.95); }
+
+        /* Цветовое разделение зон маскона */
+        button.notch-btn.brake { color: var(--danger); border-color: rgba(248, 81, 73, 0.4); }
+        button.notch-btn.brake.active { background: var(--danger); color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(248, 81, 73, 0.5); }
+
+        button.notch-btn.neutral { background: #21262d; border-color: #8b949e; }
+        button.notch-btn.neutral.active { background: #8b949e; color: #000; border-color: #fff; }
+
+        button.notch-btn.power { color: var(--success); border-color: rgba(63, 185, 80, 0.4); }
+        button.notch-btn.power.active { background: var(--success); color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(63, 185, 80, 0.5); }
 
         .console {
-            background: #050505;
-            border: 1px solid #222;
-            height: 180px;
+            background: #010409;
+            border: 1px solid var(--accent-dim);
+            height: 220px;
             overflow-y: auto;
             padding: 6px;
             font-size: 9px;
-            color: #66fcf1;
+            color: #7ee787;
             border-radius: 4px;
+            line-height: 1.3;
         }
     </style>
 </head>
 <body>
 
-    <h1>クハ 9001 - Tokyu 9000 Web Sampler Engine</h1>
-    <div class="sub">Ported from RSM2 JavaScript Sound Core</div>
+    <h1>クハ 9001 - Tokyu 9000 Realistic Master Controller</h1>
+    <div class="sub">Enhanced Master Controller Engine with Mechanical Detent Audio Feedback</div>
 
     <div class="workspace">
         <div class="card dash">
-            <div class="title" style="width:100%">Пульт машиниста</div>
+            <div class="title" style="width:100%">Пульт машиниста (Mascon)</div>
             
             <button id="pwr" class="pwr-btn" onclick="WebSamplerCore.togglePower()">[КЛЮЧ ПИТАНИЯ: ВЫКЛ]</button>
 
@@ -147,29 +172,35 @@
 
             <div class="status" id="stat">Кабина обесточена</div>
 
-            <div class="pad">
-                <button class="nt brk" onclick="WebSamplerCore.setNotch(-8)" id="n_eb">EB</button>
-                <button class="nt brk" onclick="WebSamplerCore.setNotch(-5)" id="n_b5">B5</button>
-                <button class="nt brk" onclick="WebSamplerCore.setNotch(-1)" id="n_b1">B1</button>
-                
-                <button class="nt" onclick="WebSamplerCore.setNotch(0)" id="n_n" style="grid-column: span 3; background:#111;">N (Нейтраль)</button>
-                
-                <button class="nt" onclick="WebSamplerCore.setNotch(1)" id="n_p1">P1</button>
-                <button class="nt" onclick="WebSamplerCore.setNotch(2)" id="n_p2">P2</button>
-                <button class="nt" onclick="WebSamplerCore.setNotch(3)" id="n_p3">P3</button>
-                <button class="nt" onclick="WebSamplerCore.setNotch(4)" id="n_p4">P4</button>
-                <button class="nt" onclick="WebSamplerCore.setNotch(5)" id="n_p5" style="grid-column: span 2;">P5 (Макс)</button>
+            <div class="master-controller">
+                <div style="font-size: 9px; color: #8b949e; text-align: center; margin-bottom: 2px;">— ТОРМОЗНАЯ ЗОНА (BRAKE) —</div>
+                <div class="mc-row">
+                    <button class="notch-btn brake" onclick="WebSamplerCore.setNotch(-8)" id="n_eb">EB</button>
+                    <button class="notch-btn brake" onclick="WebSamplerCore.setNotch(-7)" id="n_b7">B7</button>
+                    <button class="notch-btn brake" onclick="WebSamplerCore.setNotch(-5)" id="n_b5">B5</button>
+                    <button class="notch-btn brake" onclick="WebSamplerCore.setNotch(-3)" id="n_b3">B3</button>
+                    <button class="notch-btn brake" onclick="WebSamplerCore.setNotch(-1)" id="n_b1">B1</button>
+                </div>
+
+                <div style="font-size: 9px; color: #8b949e; text-align: center; margin: 2px 0;">— ХОДОВАЯ И НЕЙТРАЛЬ —</div>
+                <div class="mc-row">
+                    <button class="notch-btn neutral" onclick="WebSamplerCore.setNotch(0)" id="n_n" style="flex: 2;">N</button>
+                    <button class="notch-btn power" onclick="WebSamplerCore.setNotch(1)" id="n_p1">P1</button>
+                    <button class="notch-btn power" onclick="WebSamplerCore.setNotch(2)" id="n_p2">P2</button>
+                    <button class="notch-btn power" onclick="WebSamplerCore.setNotch(3)" id="n_p3">P3</button>
+                    <button class="notch-btn power" onclick="WebSamplerCore.setNotch(4)" id="n_p4">P4</button>
+                    <button class="notch-btn power" onclick="WebSamplerCore.setNotch(5)" id="n_p5">P5</button>
+                </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="title">Лог загрузчика и состояния семплов</div>
-            <div class="console" id="logBox">[System] Ready to load TQ9000 sound tracks[cite: 1].<br></div>
+            <div class="title">Лог маскона и звукового движка</div>
+            <div class="console" id="logBox">[System] Mascon interface initialized.<br></div>
         </div>
     </div>
 
     <script>
-        // Полные данные треков из твоего скрипта RTM/RSM2
         const SoundTrackData = [
             {"pitch":[[0,1],[40,1]],"volume":[[0,0.8],[40,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-0.ogg"},
             {"pitch":[[0.1,1],[5,1]],"volume":[[0.1,0],[0.5,0.5],[2,0.7],[2.3,0.4],[5,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-1.ogg"},
@@ -197,7 +228,7 @@
             {"pitch":[[7,0.9],[8.4,1.15]],"volume":[[7,0],[7.3,0.7],[8.2,0.7],[8.4,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-23.ogg"},
             {"pitch":[[6,1],[7.3,1]],"volume":[[6,0],[6.2,0.2],[7.1,0.3],[7.3,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-24.ogg"},
             {"pitch":[[3,1],[6.5,1]],"volume":[[3,0],[5,0.5],[6.3,0.5],[6.5,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-25.ogg"},
-            {"pitch":[[65,0.75],[140,1.5]],"volume":[[65,0],[85,0.5],[139,0.7],[140,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-26.ogg"},
+            {"pitch":[[65,0.75],[140,1.5]],"volume":[[65,0],[85,0.5],[139,0.7],[140,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-26.ogg"},
             {"pitch":[[0.1,0.5],[65,1.35]],"volume":[[0.1,0],[15,0.5],[40,0.6],[65,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-27.ogg"},
             {"pitch":[[40,0.6],[100,1.5]],"volume":[[40,0],[60,0.2],[75,0.3],[100,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-28.ogg"},
             {"pitch":[[57,0.5],[140,1.7]],"volume":[[57,0],[105,1],[139,1],[140,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-29.ogg"},
@@ -226,11 +257,11 @@
             return valueList[valueList.length - 1][1];
         }
 
-        class WebSamplerController {
+        class RealisticMasconController {
             constructor() {
                 this.ctx = null;
                 this.power = false;
-                this.notch = 0;
+                this.notch = 0; // от -8 (EB) до +5 (P5)
                 this.speed = 0.0;
                 this.targetSpeed = 0.0;
                 this.powerFade = 0;
@@ -250,9 +281,8 @@
                 if (this.ctx) return;
                 const AC = window.AudioContext || window.webkitAudioContext;
                 this.ctx = new AC();
-                this.log("AudioContext initialized.");
+                this.log("Синтезатор звука и WebAudio инициализированы.");
 
-                // Загрузка всех семплов
                 for (let track of SoundTrackData) {
                     let fn = track.fileName;
                     try {
@@ -260,14 +290,27 @@
                         let arrayBuffer = await response.arrayBuffer();
                         this.buffers[fn] = await this.ctx.decodeAudioData(arrayBuffer);
                         this.loadedCount++;
-                        if (this.loadedCount % 5 === 0 || this.loadedCount === SoundTrackData.length) {
-                            this.log(`Loaded samples: ${this.loadedCount}/${SoundTrackData.length}`);
-                        }
-                    } catch (e) {
-                        // Ошибки заглушаем на случай если файл не положен рядом
-                    }
+                    } catch (e) {}
                 }
-                this.log("All sample buffers loaded & decoded.");
+                this.log(`Загружено семплов: ${this.loadedCount}/${SoundTrackData.length}`);
+            }
+
+            // Синтез механического щелчка фиксатора маскона (detent click)
+            playClickSound() {
+                if (!this.ctx) return;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.03);
+                
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.03);
             }
 
             togglePower() {
@@ -279,9 +322,9 @@
                     if (!this.ctx) this.initAudio();
                     else this.ctx.resume();
                     btn.classList.add('active');
-                    btn.innerText = "[КЛЮЧ ПИТАНИЯ: ВКЛ]";
-                    stat.innerText = "Система активна.";
-                    this.log("Power ON.");
+                    btn.innerText = "[КЛЮЧ ПИТАНИЯ: ВКЛ (토큐 9000系)]";
+                    stat.innerText = "Система управления включена. Контроллер в позиции N.";
+                    this.log("Главный выключатель замкнут. Питание подано на инвертор.");
                     this.startLoop();
                 } else {
                     btn.classList.remove('active');
@@ -290,26 +333,41 @@
                     this.setNotch(0);
                     this.targetSpeed = 0;
                     this.stopAllSources();
-                    this.log("Power OFF.");
+                    this.log("Питание отключено.");
                 }
             }
 
             setNotch(n) {
                 if (!this.power && n !== 0) return;
-                this.notch = n;
-                document.querySelectorAll('.nt').forEach(b => b.classList.remove('active'));
+                if (this.notch !== n) {
+                    this.notch = n;
+                    this.playClickSound(); // Щелчок реального маскона
+                }
+
+                // Обновление подсветки кнопок пульта
+                document.querySelectorAll('.notch-btn').forEach(b => b.classList.remove('active'));
                 let id = 'n_n';
                 if (n === -8) id = 'n_eb';
+                else if (n === -7) id = 'n_b7';
                 else if (n === -5) id = 'n_b5';
+                else if (n === -3) id = 'n_b3';
                 else if (n === -1) id = 'n_b1';
                 else if (n > 0) id = 'n_p' + n;
-                document.getElementById(id).classList.add('active');
+                
+                const activeEl = document.getElementById(id);
+                if (activeEl) activeEl.classList.add('active');
 
-                if (n <= 0) this.targetSpeed = 0;
-                else {
-                    const spdMap = [0, 20, 42, 65, 80, 95];
+                // Логика набора/сброса скорости по позициям
+                if (n <= 0) {
+                    this.targetSpeed = 0;
+                } else {
+                    // Реалистичные пороги разгона по позициям P1-P5
+                    const spdMap = [0, 22, 45, 70, 88, 105];
                     this.targetSpeed = spdMap[n];
                 }
+                
+                let notchName = n === -8 ? "EB (Экстренный)" : (n < 0 ? `Brake B${Math.abs(n)}` : (n === 0 ? "Neutral (N)" : `Power P${n}`));
+                this.log(`Позиция маскона изменена -> [ ${notchName} ]`);
             }
 
             stopAllSources() {
@@ -323,22 +381,22 @@
                 setInterval(() => {
                     if (!this.power) return;
 
-                    // Физика скорости
+                    // Плавная инерция поезда
                     if (this.speed < this.targetSpeed) {
-                        this.speed += 0.15;
+                        this.speed += 0.12;
                         if (this.speed > this.targetSpeed) this.speed = this.targetSpeed;
                     } else if (this.speed > this.targetSpeed) {
-                        this.speed -= 0.15;
+                        let decel = this.notch === -8 ? 0.6 : (this.notch < 0 ? 0.25 : 0.08 выбег);
+                        this.speed -= decel;
                         if (this.speed < 0) this.speed = 0;
                     }
                     document.getElementById('spd').innerText = this.speed.toFixed(1);
 
-                    // Power fade logic (из твоего скрипта)
+                    // Power fade logic
                     if (this.notch > 0) this.powerFade = Math.min(this.powerFade + 0.2, 1.0);
                     else if (this.notch < 0) this.powerFade = Math.max(this.powerFade - 0.2, -1.0);
                     else this.powerFade *= 0.9;
 
-                    // Обработка треков аналогично JavaScript-логике RTM
                     SoundTrackData.forEach(track => {
                         let fn = track.fileName;
                         if (!this.buffers[fn]) return;
@@ -349,7 +407,6 @@
                         let volume = interpolate(track.volume, this.speed);
                         if (this.speed > track.volume[track.volume.length - 1][0]) volume = 0;
 
-                        // Микшер нотчей
                         let mixerVol = 1;
                         let isP = track.isNotchPower;
                         let isOff = track.isNotchOff;
@@ -367,7 +424,6 @@
 
                         let finalVol = volume * mixerVol;
 
-                        // Запуск / обновление зацикленных семплов
                         if (finalVol > 0) {
                             if (!this.sources[fn]) {
                                 let src = this.ctx.createBufferSource();
@@ -396,7 +452,7 @@
             }
         }
 
-        const WebSamplerCore = new WebSamplerController();
+        const WebSamplerCore = new RealisticMasconController();
     </script>
 </body>
 </html>
