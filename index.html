@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>クハ 9001 - Tokyu 9000 GTO Web Sampler</title>
+    <style>
+        :root {
+            --bg: #0b0c10;
+            --panel: #1f2833;
+            --accent: #66fcf1;
+            --accent-dim: #45a29e;
+            --text: #c5c6c7;
+            --danger: #ff5555;
+            --success: #55ff55;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Consolas', monospace; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        h1 { color: var(--accent); font-size: 18px; margin-bottom: 3px; text-transform: uppercase; }
+        .sub { font-size: 10px; color: var(--accent-dim); margin-bottom: 12px; }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 320px 480px;
+            gap: 12px;
+            width: 812px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--accent-dim);
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .title {
+            font-size: 11px;
+            color: var(--accent);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--accent-dim);
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .dash { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        
+        .pwr-btn {
+            background: #2c0b0e;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            width: 100%;
+            padding: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .pwr-btn.active {
+            background: #0b2c12;
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .screen {
+            background: #000;
+            border: 2px inset var(--accent-dim);
+            width: 100%;
+            padding: 8px;
+            text-align: center;
+            border-radius: 4px;
+        }
+        .speed-num { font-size: 38px; color: var(--success); font-weight: bold; }
+        .speed-lbl { font-size: 9px; color: #707070; margin-top: 2px; }
+
+        .status {
+            background: #111;
+            border: 1px solid #333;
+            width: 100%;
+            padding: 6px;
+            font-size: 10px;
+            color: var(--accent);
+            text-align: center;
+            border-radius: 4px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            width: 100%;
+        }
+        button.nt {
+            background: #0b0c10;
+            color: var(--text);
+            border: 1px solid #45a29e;
+            padding: 9px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button.nt:hover { background: #1f2833; border-color: var(--accent); }
+        button.nt.active { background: var(--accent); color: #0b0c10; border-color: #fff; }
+        .brk { border-color: #ff5555 !important; color: #ff5555 !important; }
+        .brk.active { background: #ff5555 !important; color: #000 !important; }
+
+        .console {
+            background: #050505;
+            border: 1px solid #222;
+            height: 180px;
+            overflow-y: auto;
+            padding: 6px;
+            font-size: 9px;
+            color: #66fcf1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>クハ 9001 - Tokyu 9000 Web Sampler Engine</h1>
+    <div class="sub">Ported from RSM2 JavaScript Sound Core</div>
+
+    <div class="workspace">
+        <div class="card dash">
+            <div class="title" style="width:100%">Пульт машиниста</div>
+            
+            <button id="pwr" class="pwr-btn" onclick="WebSamplerCore.togglePower()">[КЛЮЧ ПИТАНИЯ: ВЫКЛ]</button>
+
+            <div class="screen">
+                <div class="speed-num" id="spd">00.0</div>
+                <div class="speed-lbl">км/ч [Oimachi Line]</div>
+            </div>
+
+            <div class="status" id="stat">Кабина обесточена</div>
+
+            <div class="pad">
+                <button class="nt brk" onclick="WebSamplerCore.setNotch(-8)" id="n_eb">EB</button>
+                <button class="nt brk" onclick="WebSamplerCore.setNotch(-5)" id="n_b5">B5</button>
+                <button class="nt brk" onclick="WebSamplerCore.setNotch(-1)" id="n_b1">B1</button>
+                
+                <button class="nt" onclick="WebSamplerCore.setNotch(0)" id="n_n" style="grid-column: span 3; background:#111;">N (Нейтраль)</button>
+                
+                <button class="nt" onclick="WebSamplerCore.setNotch(1)" id="n_p1">P1</button>
+                <button class="nt" onclick="WebSamplerCore.setNotch(2)" id="n_p2">P2</button>
+                <button class="nt" onclick="WebSamplerCore.setNotch(3)" id="n_p3">P3</button>
+                <button class="nt" onclick="WebSamplerCore.setNotch(4)" id="n_p4">P4</button>
+                <button class="nt" onclick="WebSamplerCore.setNotch(5)" id="n_p5" style="grid-column: span 2;">P5 (Макс)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="title">Лог загрузчика и состояния семплов</div>
+            <div class="console" id="logBox">[System] Ready to load TQ9000 sound tracks[cite: 1].<br></div>
+        </div>
+    </div>
+
+    <script>
+        // Полные данные треков из твоего скрипта RTM/RSM2
+        const SoundTrackData = [
+            {"pitch":[[0,1],[40,1]],"volume":[[0,0.8],[40,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-0.ogg"},
+            {"pitch":[[0.1,1],[5,1]],"volume":[[0.1,0],[0.5,0.5],[2,0.7],[2.3,0.4],[5,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-1.ogg"},
+            {"pitch":[[1.9,0.75],[3.4,1.13]],"volume":[[1.9,0],[2.1,0.6],[3.1,0.7],[3.4,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-2.ogg"},
+            {"pitch":[[3.1,1],[8,1.75]],"volume":[[3.1,0],[3.4,0.7],[6,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-3.ogg"},
+            {"pitch":[[3,0.6],[8,1.3]],"volume":[[3,0],[5,0.8],[7.5,0.8],[8,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-4.ogg"},
+            {"pitch":[[7,0.87],[16,1.6]],"volume":[[7,0],[7.5,0.7],[16,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-5.ogg"},
+            {"pitch":[[7,0.6],[15,1.12]],"volume":[[7,0],[10,0.9],[12,1],[15,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-6.ogg"},
+            {"pitch":[[9,0.65],[20,1.35]],"volume":[[9,0],[14,1],[16.5,1],[17,0.2],[20,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-7.ogg"},
+            {"pitch":[[16.2,0.85],[25,1.35]],"volume":[[16.2,0],[16.9,0.9],[18,0.9],[19,0.4],[25,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-8.ogg"},
+            {"pitch":[[16.5,0.9],[25,1.37]],"volume":[[16.5,0],[19,0.9],[21,0.9],[21.5,0.4],[25,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-9.ogg"},
+            {"pitch":[[17,0.77],[25.5,1.07],[26,1.12],[45,1.75]],"volume":[[17,0],[21,0.5],[21.5,0.9],[25.5,1],[26.5,0.7],[45,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-10.ogg"},
+            {"pitch":[[25,0.77],[45,1.45]],"volume":[[25.5,0],[26,0.8],[32,1],[45,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-11.ogg"},
+            {"pitch":[[27,0.6],[65,1.35]],"volume":[[28,0],[39,0.9],[50,1],[65,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-12.ogg"},
+            {"pitch":[[40,0.7],[95,1.4]],"volume":[[45,0],[60,1],[73,1],[95,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-13.ogg"},
+            {"pitch":[[35,0.7],[65,1.3]],"volume":[[37,0],[43,1],[51,1],[65,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-14.ogg"},
+            {"pitch":[[47,0.7],[95,1.4]],"volume":[[47,0],[60,1],[73,1],[95,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-15.ogg"},
+            {"pitch":[[26,0.8],[50,1.45]],"volume":[[26,0],[31.8,0.2],[32.5,0.9],[38,1],[50,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-16.ogg"},
+            {"pitch":[[22,0.65],[40,1.35]],"volume":[[26,0],[30.5,0.9],[32.1,0.9],[32.5,0.3],[40,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-17.ogg"},
+            {"pitch":[[23,0.85],[35,1.35]],"volume":[[23,0],[23.5,0.8],[29,0.7],[30.5,0.3],[35,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-18.ogg"},
+            {"pitch":[[17,0.9],[27,1.35]],"volume":[[17,0],[21,0.9],[23.5,1],[24,0.2],[27,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-19.ogg"},
+            {"pitch":[[14,0.78],[22,1.25]],"volume":[[14,0],[14.5,0.8],[19,0.9],[22,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-20.ogg"},
+            {"pitch":[[8,0.5],[16,1]],"volume":[[8,0],[14,0.8],[16,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-21.ogg"},
+            {"pitch":[[8,0.65],[14.6,1.4]],"volume":[[8,0],[8.5,0.8],[14.2,1],[14.6,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-22.ogg"},
+            {"pitch":[[7,0.9],[8.4,1.15]],"volume":[[7,0],[7.3,0.7],[8.2,0.7],[8.4,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-23.ogg"},
+            {"pitch":[[6,1],[7.3,1]],"volume":[[6,0],[6.2,0.2],[7.1,0.3],[7.3,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-24.ogg"},
+            {"pitch":[[3,1],[6.5,1]],"volume":[[3,0],[5,0.5],[6.3,0.5],[6.5,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-25.ogg"},
+            {"pitch":[[65,0.75],[140,1.5]],"volume":[[65,0],[85,0.5],[139,0.7],[140,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-26.ogg"},
+            {"pitch":[[0.1,0.5],[65,1.35]],"volume":[[0.1,0],[15,0.5],[40,0.6],[65,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-27.ogg"},
+            {"pitch":[[40,0.6],[100,1.5]],"volume":[[40,0],[60,0.2],[75,0.3],[100,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-28.ogg"},
+            {"pitch":[[57,0.5],[140,1.7]],"volume":[[57,0],[105,1],[139,1],[140,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-29.ogg"},
+            {"pitch":[[0,0.5],[65,1.3]],"volume":[[0,0],[50,0.8],[65,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-30.ogg"},
+            {"pitch":[[45,0.7],[140,1.6]],"volume":[[45,0],[65,0.9],[130,1],[140,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-31.ogg"},
+            {"pitch":[[0,1.1],[2,0.95],[7,0.9]],"volume":[[0,0],[0.5,0.5],[3,0.4],[7,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-32.ogg"},
+            {"pitch":[[40,0.5],[100,1.4]],"volume":[[40,0],[75,0.8],[100,0]],"isMute":false,"isNotchPower":true,"isNotchOff":true,"isNotchBrake":true,"isFadeMixer":false,"fileName":"TQ9000-33.ogg"},
+            {"pitch":[[0,1],[10,1]],"volume":[[0,0],[1,0.5],[2,0.2],[10,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-34.ogg"},
+            {"pitch":[[3,1],[6.5,1]],"volume":[[3,0],[5,0.6],[6.3,0.6],[6.5,0]],"isMute":false,"isNotchPower":false,"isNotchOff":false,"isNotchBrake":true,"isFadeMixer":true,"fileName":"TQ9000-35.ogg"},
+            {"pitch":[[5.5,0.5],[22,1]],"volume":[[5.5,0],[20,0.6],[22,0]],"isMute":false,"isNotchPower":true,"isNotchOff":false,"isNotchBrake":false,"isFadeMixer":true,"fileName":"TQ9000-36.ogg"}
+        ];
+
+        function interpolate(valueList, speed) {
+            if (valueList.length === 1) return 0;
+            if (speed < valueList[0][0]) return valueList[0][1];
+            for (let i = 0; i < valueList.length - 1; i++) {
+                let currentSpeed = valueList[i][0];
+                let currentValue = valueList[i][1];
+                let nextSpeed = valueList[i + 1][0];
+                let nextValue = valueList[i + 1][1];
+                if (speed >= currentSpeed && speed <= nextSpeed) {
+                    let ratio = (speed - currentSpeed) / (nextSpeed - currentSpeed);
+                    return currentValue + (nextValue - currentValue) * ratio;
+                }
+            }
+            return valueList[valueList.length - 1][1];
+        }
+
+        class WebSamplerController {
+            constructor() {
+                this.ctx = null;
+                this.power = false;
+                this.notch = 0;
+                this.speed = 0.0;
+                this.targetSpeed = 0.0;
+                this.powerFade = 0;
+                this.buffers = {};
+                this.sources = {};
+                this.gainNodes = {};
+                this.loadedCount = 0;
+            }
+
+            log(txt) {
+                const box = document.getElementById('logBox');
+                box.innerHTML += `[${new Date().toTimeString().split(' ')[0]}] ${txt}<br>`;
+                box.scrollTop = box.scrollHeight;
+            }
+
+            async initAudio() {
+                if (this.ctx) return;
+                const AC = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AC();
+                this.log("AudioContext initialized.");
+
+                // Загрузка всех семплов
+                for (let track of SoundTrackData) {
+                    let fn = track.fileName;
+                    try {
+                        let response = await fetch(fn);
+                        let arrayBuffer = await response.arrayBuffer();
+                        this.buffers[fn] = await this.ctx.decodeAudioData(arrayBuffer);
+                        this.loadedCount++;
+                        if (this.loadedCount % 5 === 0 || this.loadedCount === SoundTrackData.length) {
+                            this.log(`Loaded samples: ${this.loadedCount}/${SoundTrackData.length}`);
+                        }
+                    } catch (e) {
+                        // Ошибки заглушаем на случай если файл не положен рядом
+                    }
+                }
+                this.log("All sample buffers loaded & decoded.");
+            }
+
+            togglePower() {
+                this.power = !this.power;
+                const btn = document.getElementById('pwr');
+                const stat = document.getElementById('stat');
+
+                if (this.power) {
+                    if (!this.ctx) this.initAudio();
+                    else this.ctx.resume();
+                    btn.classList.add('active');
+                    btn.innerText = "[КЛЮЧ ПИТАНИЯ: ВКЛ]";
+                    stat.innerText = "Система активна.";
+                    this.log("Power ON.");
+                    this.startLoop();
+                } else {
+                    btn.classList.remove('active');
+                    btn.innerText = "[КЛЮЧ ПИТАНИЯ: ВЫКЛ]";
+                    stat.innerText = "Кабина обесточена.";
+                    this.setNotch(0);
+                    this.targetSpeed = 0;
+                    this.stopAllSources();
+                    this.log("Power OFF.");
+                }
+            }
+
+            setNotch(n) {
+                if (!this.power && n !== 0) return;
+                this.notch = n;
+                document.querySelectorAll('.nt').forEach(b => b.classList.remove('active'));
+                let id = 'n_n';
+                if (n === -8) id = 'n_eb';
+                else if (n === -5) id = 'n_b5';
+                else if (n === -1) id = 'n_b1';
+                else if (n > 0) id = 'n_p' + n;
+                document.getElementById(id).classList.add('active');
+
+                if (n <= 0) this.targetSpeed = 0;
+                else {
+                    const spdMap = [0, 20, 42, 65, 80, 95];
+                    this.targetSpeed = spdMap[n];
+                }
+            }
+
+            stopAllSources() {
+                Object.keys(this.sources).forEach(fn => {
+                    try { this.sources[fn].stop(); } catch(e){}
+                    delete this.sources[fn];
+                });
+            }
+
+            startLoop() {
+                setInterval(() => {
+                    if (!this.power) return;
+
+                    // Физика скорости
+                    if (this.speed < this.targetSpeed) {
+                        this.speed += 0.15;
+                        if (this.speed > this.targetSpeed) this.speed = this.targetSpeed;
+                    } else if (this.speed > this.targetSpeed) {
+                        this.speed -= 0.15;
+                        if (this.speed < 0) this.speed = 0;
+                    }
+                    document.getElementById('spd').innerText = this.speed.toFixed(1);
+
+                    // Power fade logic (из твоего скрипта)
+                    if (this.notch > 0) this.powerFade = Math.min(this.powerFade + 0.2, 1.0);
+                    else if (this.notch < 0) this.powerFade = Math.max(this.powerFade - 0.2, -1.0);
+                    else this.powerFade *= 0.9;
+
+                    // Обработка треков аналогично JavaScript-логике RTM
+                    SoundTrackData.forEach(track => {
+                        let fn = track.fileName;
+                        if (!this.buffers[fn]) return;
+
+                        let pitch = interpolate(track.pitch, this.speed);
+                        pitch = Math.min(Math.max(pitch, 0.5), 2.0);
+
+                        let volume = interpolate(track.volume, this.speed);
+                        if (this.speed > track.volume[track.volume.length - 1][0]) volume = 0;
+
+                        // Микшер нотчей
+                        let mixerVol = 1;
+                        let isP = track.isNotchPower;
+                        let isOff = track.isNotchOff;
+                        let isB = track.isNotchBrake;
+
+                        if (track.isFadeMixer && (isOff !== isP || isOff !== isB)) {
+                            let nf = Number(this.powerFade);
+                            let nff = Number(1 - Math.abs(nf));
+                            mixerVol *= Math.max(Number(isP && nf > 0), Number(isOff && nff > 0), Number(isB && nf < 0));
+                            mixerVol *= isOff ? Number(nff) : Number(Math.abs(nf));
+                        } else {
+                            mixerVol *= Math.max(Number(isP && this.notch > 0), Number(isOff && this.notch === 0), Number(isB && this.notch < 0));
+                        }
+                        mixerVol *= Number(!track.isMute);
+
+                        let finalVol = volume * mixerVol;
+
+                        // Запуск / обновление зацикленных семплов
+                        if (finalVol > 0) {
+                            if (!this.sources[fn]) {
+                                let src = this.ctx.createBufferSource();
+                                src.buffer = this.buffers[fn];
+                                src.loop = true;
+
+                                let gain = this.ctx.createGain();
+                                src.connect(gain);
+                                gain.connect(this.ctx.destination);
+
+                                src.start(0);
+                                this.sources[fn] = src;
+                                this.gainNodes[fn] = gain;
+                            }
+                            this.sources[fn].playbackRate.setTargetAtTime(pitch, this.ctx.currentTime, 0.05);
+                            this.gainNodes[fn].gain.setTargetAtTime(finalVol, this.ctx.currentTime, 0.05);
+                        } else {
+                            if (this.sources[fn]) {
+                                try { this.sources[fn].stop(); } catch(e){}
+                                delete this.sources[fn];
+                                delete this.gainNodes[fn];
+                            }
+                        }
+                    });
+                }, 50);
+            }
+        }
+
+        const WebSamplerCore = new WebSamplerController();
+    </script>
+</body>
+</html>
